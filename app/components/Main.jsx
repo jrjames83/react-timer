@@ -1,4 +1,5 @@
 var React = require('react');
+var Nav = require('Nav');
 
 
 // var Main = React.createClass({
@@ -18,6 +19,7 @@ var React = require('react');
 var Main = (props) => {
     return (
 	    <div>
+	   	 <Nav />
 	     <div className="row">
 	       <div className="medium-6 large-8 columns small-centered">
 	       <p> Main.jsx rendered</p>
