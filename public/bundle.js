@@ -105,13 +105,15 @@
 	var hashHistory = _require.hashHistory;
 
 	var Main = __webpack_require__(229);
+	var Timer = __webpack_require__(231);
+	var Countdown = __webpack_require__(233);
 
 	// Load foundation
-	__webpack_require__(231);
+	__webpack_require__(236);
 	$(document).foundation();
 
 	// App css
-	__webpack_require__(235);
+	__webpack_require__(240);
 
 	/*
 
@@ -123,7 +125,12 @@
 	ReactDOM.render(React.createElement(
 	  Router,
 	  { history: hashHistory },
-	  React.createElement(Route, { path: '/', component: Main })
+	  React.createElement(
+	    Route,
+	    { path: '/', component: Main },
+	    React.createElement(Route, { path: 'countdown', component: Countdown }),
+	    React.createElement(IndexRoute, { component: Timer })
+	  )
 	), document.getElementById('app'));
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
@@ -25491,21 +25498,9 @@
 
 	var React = __webpack_require__(8);
 	var Nav = __webpack_require__(230);
+	var Timer = __webpack_require__(231);
+	var Countdown = __webpack_require__(233);
 
-	// var Main = React.createClass({
-	//     render() {
-	//         return (
-	//         <div>
-	//          <Nav />
-	// 		 <h2> Main Component </h2>
-	// 		 	{this.props.children}
-	// 		</div>
-	// 	    );
-	//     }
-	// });
-
-
-	// Redo as a functional component (need not manage state)
 	var Main = function Main(props) {
 					return React.createElement(
 									'div',
@@ -25516,7 +25511,7 @@
 													{ className: 'row' },
 													React.createElement(
 																	'div',
-																	{ className: 'medium-6 large-8 columns small-centered' },
+																	{ className: 'medium-6 large-4 columns small-centered' },
 																	React.createElement(
 																					'p',
 																					null,
@@ -25575,7 +25570,7 @@
 	                        null,
 	                        React.createElement(
 	                            Link,
-	                            { to: '/', activeClassName: 'active-link', activeStyle: { fontWeight: 'bold' } },
+	                            { to: '/countdown', activeClassName: 'active-link', activeStyle: { fontWeight: 'bold' } },
 	                            'Countdown'
 	                        )
 	                    )
@@ -25609,13 +25604,240 @@
 /* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	var React = __webpack_require__(8);
+	var Clock = __webpack_require__(232);
+
+	var Timer = React.createClass({
+	    displayName: 'Timer',
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	                'h1',
+	                null,
+	                'Timer - Clock Should Render Below'
+	            ),
+	            React.createElement(Clock, null)
+	        );
+	    }
+	});
+
+	module.exports = Timer;
+
+/***/ },
+/* 232 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+
+	var Clock = React.createClass({
+					formatSeconds: function formatSeconds(totalSeconds) {
+									var seconds = totalSeconds % 60;
+									var minutes = Math.floor(totalSeconds / 60);
+									seconds < 10 ? seconds = '0' + seconds : seconds;
+									minutes < 10 ? minutes = '0' + minutes : minutes;
+									return minutes + ':' + seconds;
+					},
+					getDefaultProps: function getDefaultProps() {
+									return {
+													totalSeconds: 0
+									};
+					},
+
+					propTypes: {
+									totalSeconds: React.PropTypes.number
+					},
+					displayName: 'Clock',
+					render: function render() {
+									var totalSeconds = this.props.totalSeconds;
+
+									return React.createElement(
+													'div',
+													{ className: 'clock' },
+													React.createElement(
+																	'span',
+																	{ className: 'clock-text' },
+																	this.formatSeconds(totalSeconds)
+													)
+									);
+					}
+	});
+
+	module.exports = Clock;
+
+/***/ },
+/* 233 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+	var Clock = __webpack_require__(232);
+	var CountdownForm = __webpack_require__(234);
+	var Controls = __webpack_require__(235);
+
+	// Counter component is a presentational component that maintains state
+	// But also interacts with our countdown form component (child)
+
+	var Countdown = React.createClass({
+	  getInitialState: function getInitialState() {
+	    return {
+	      count: 0,
+	      countdownStatus: 'stopped'
+	    };
+	  },
+
+
+	  displayName: 'Countdown',
+
+	  handleOnSetCountdown: function handleOnSetCountdown(seconds) {
+	    console.log("updating state " + seconds);
+	    this.setState({
+	      count: seconds,
+	      countdownStatus: 'started'
+	    });
+	  },
+
+
+	  // Component lifescycle method when state changes
+	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	    console.log("component did update");
+	    if (this.state.countdownStatus !== prevState.countdownStatus) {
+	      switch (this.state.countdownStatus) {
+	        case 'started':
+	          this.startTimer();
+	          break;
+	      }
+	    }
+	  },
+	  startTimer: function startTimer() {
+	    var _this = this;
+
+	    this.timer = setInterval(function () {
+	      console.log("interval ran");
+	      var newCount = _this.state.count - 1;
+	      _this.setState({
+	        count: newCount >= 0 ? newCount : 0
+	      });
+	    }, 1000);
+	  },
+	  render: function render() {
+	    var count = this.state.count;
+
+
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(Clock, { totalSeconds: count }),
+	      React.createElement(CountdownForm, { onSetCountdown: this.handleOnSetCountdown })
+	    );
+	  }
+	});
+
+	module.exports = Countdown;
+
+/***/ },
+/* 234 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+
+	var CountdownForm = React.createClass({
+	    displayName: 'CountdownForm',
+	    onSubmit: function onSubmit(e) {
+	        e.preventDefault();
+	        var strSeconds = this.refs.seconds.value;
+	        if (strSeconds.match(/^[0-9]+$/)) {
+	            this.refs.seconds.value = '';
+	            this.props.onSetCountdown(parseInt(strSeconds, 10));
+	            console.log(parseInt(strSeconds));
+	        }
+	    },
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	                'form',
+	                { ref: 'form', onSubmit: this.onSubmit, className: 'countdown-form' },
+	                React.createElement('input', { type: 'text', placeholder: 'Enter time in seconds', ref: 'seconds' }),
+	                React.createElement(
+	                    'button',
+	                    { className: 'button expanded' },
+	                    'Start'
+	                )
+	            )
+	        );
+	    }
+	});
+
+	module.exports = CountdownForm;
+
+/***/ },
+/* 235 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+
+	var Controls = React.createClass({
+	    displayName: 'Controls',
+	    propTypes: {
+	        countdownStatus: React.PropTypes.string.isRequired
+	    },
+	    render: function render() {
+	        var countdownStatus = this.props.countdownStatus;
+
+	        var renderStartStopButton = function renderStartStopButton() {
+	            if (countdownStatus === 'started') {
+	                return React.createElement(
+	                    'button',
+	                    { className: 'button secondary' },
+	                    'Pause'
+	                );
+	            } else if (countdownStatus === 'stopped') {
+	                return React.createElement(
+	                    'button',
+	                    { className: 'button primary' },
+	                    'Start'
+	                );
+	            }
+	        };
+
+	        return React.createElement(
+	            'div',
+	            { className: 'controls' },
+	            renderStartStopButton(),
+	            React.createElement(
+	                'button',
+	                { className: 'button alert hollow' },
+	                'Clear'
+	            )
+	        );
+	    }
+	});
+
+	module.exports = Controls;
+
+/***/ },
+/* 236 */
+/***/ function(module, exports, __webpack_require__) {
+
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(232);
+	var content = __webpack_require__(237);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(234)(content, {});
+	var update = __webpack_require__(239)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -25632,10 +25854,10 @@
 	}
 
 /***/ },
-/* 232 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(233)();
+	exports = module.exports = __webpack_require__(238)();
 	// imports
 
 
@@ -25646,7 +25868,7 @@
 
 
 /***/ },
-/* 233 */
+/* 238 */
 /***/ function(module, exports) {
 
 	/*
@@ -25702,7 +25924,7 @@
 
 
 /***/ },
-/* 234 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -25954,16 +26176,16 @@
 
 
 /***/ },
-/* 235 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(236);
+	var content = __webpack_require__(241);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(234)(content, {});
+	var update = __webpack_require__(239)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -25980,15 +26202,15 @@
 	}
 
 /***/ },
-/* 236 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(233)();
+	exports = module.exports = __webpack_require__(238)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.menu > li > a {\n  display: inline;\n  padding: 0; }\n", ""]);
+	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.top-bar .menu > .menu-text > a {\n  display: inline;\n  padding: 1; }\n\n.top-bar .active-link {\n  font-weight: bold; }\n\n.clock {\n  align-items: center;\n  background-color: #B5D0E2;\n  border: 2px solid #2099E8;\n  border-radius: 50%;\n  display: flex;\n  height: 14rem;\n  justify-content: center;\n  margin: 4rem auto;\n  width: 14rem; }\n\n.clock-text {\n  color: white;\n  font-size: 2.25rem;\n  font-weight: 300; }\n", ""]);
 
 	// exports
 

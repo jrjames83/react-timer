@@ -6,9 +6,16 @@
 	.menu-text{
 		color: $nav-text-color;
 	}
+
+	.menu > .menu-text > a {
+		display: inline;
+		padding: 1;
+	}
+
+	.active-link {
+		font-weight: bold;
+	}
+
+
 }
 
-.menu>li>a{
-	display: inline;
-	padding: 0;
-}
