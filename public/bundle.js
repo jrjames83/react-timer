@@ -25608,9 +25608,57 @@
 
 	var React = __webpack_require__(8);
 	var Clock = __webpack_require__(232);
+	var Controls = __webpack_require__(235);
+
+	// Starts at zero - once started, button chages to stop
+	// Clear
+	// Renders clock and controls
 
 	var Timer = React.createClass({
 	    displayName: 'Timer',
+	    getInitialState: function getInitialState() {
+	        return {
+	            count: 0,
+	            countdownStatus: 'paused'
+	        };
+	    },
+	    handleStatusChange: function handleStatusChange(newStatus) {
+	        console.log(newStatus, "is the new Status");
+	        this.setState({ countdownStatus: newStatus });
+	    },
+
+
+	    // Now somehow have to handle when clear is hit
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        console.log("component did update", prevState.countdownStatus);
+	        if (this.state.countdownStatus !== prevState.countdownStatus) {
+	            switch (this.state.countdownStatus) {
+	                case 'started':
+	                    this.startTimer();
+	                    break;
+	                case 'stopped':
+	                    this.setState({ count: 0 });
+	                    clearInterval(this.timer);
+	                    this.timer = undefined;
+	                    this.setState({ countdownStatus: 'paused' });
+	                    break; // why is it still going though?
+	                case 'paused':
+	                    clearInterval(this.timer);
+	                    this.timer = undefined;
+	                    break;
+	            }
+	        }
+	    },
+	    startTimer: function startTimer() {
+	        var _this = this;
+
+	        this.timer = setInterval(function () {
+	            var newCount = _this.state.count + 1;
+	            _this.setState({
+	                count: newCount
+	            });
+	        }, 1000);
+	    },
 	    render: function render() {
 	        return React.createElement(
 	            'div',
@@ -25618,9 +25666,10 @@
 	            React.createElement(
 	                'h1',
 	                null,
-	                'Timer - Clock Should Render Below'
+	                'Timer App'
 	            ),
-	            React.createElement(Clock, null)
+	            React.createElement(Clock, { totalSeconds: this.state.count }),
+	            React.createElement(Controls, { countdownStatus: this.state.countdownStatus, onStatusChange: this.handleStatusChange })
 	        );
 	    }
 	});
@@ -25701,35 +25750,12 @@
 	    clearInterval(this.timer);
 	    this.timer = undefined;
 	  },
-
-
-	  // as your component gets mounted - just before shown
-	  // dont' have access to refs or dom yet
-	  componentWillMount: function componentWillMount() {
-	    console.log("component will mount");
-	  },
-
-
-	  // 
-	  componentDidMount: function componentDidMount() {
-	    console.log("component did mount");
-	  },
 	  handleOnSetCountdown: function handleOnSetCountdown(seconds) {
 	    //console.log("updating state " + seconds)
 	    this.setState({
 	      count: seconds,
 	      countdownStatus: 'started'
 	    });
-	  },
-
-
-	  // Check just before an update happens
-	  componentWillUpdate: function componentWillUpdate(nextProps, nextState) {},
-
-
-	  //
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	    console.log("receiing props" + nextProps);
 	  },
 
 
@@ -25867,11 +25893,11 @@
 
 	        return function () {
 	            _this.props.onStatusChange(newStatus);
-	            console.log(newStatus);
+	            //console.log(newStatus);
 	        };
 	    },
 	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        console.log('will receive props', nextProps);
+	        //console.log('will receive props', nextProps)  
 	    },
 	    render: function render() {
 	        var _this2 = this;
@@ -25880,14 +25906,14 @@
 
 	        var renderStartStopButton = function renderStartStopButton() {
 	            if (countdownStatus === 'started') {
-	                console.log("started in controlsjsx");
+	                //console.log("started in controlsjsx")
 	                return React.createElement(
 	                    'button',
 	                    { className: 'button secondary', onClick: _this2.onStatusChange('paused') },
 	                    'Pause'
 	                );
 	            } else if (countdownStatus === 'paused') {
-	                console.log("paused in controlsjsx");
+	                //console.log("paused in controlsjsx")
 	                return React.createElement(
 	                    'button',
 	                    { className: 'button primary', onClick: _this2.onStatusChange('started') },
@@ -26294,7 +26320,7 @@
 
 
 	// module
-	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.top-bar .menu > .menu-text > a {\n  display: inline;\n  padding: 1; }\n\n.top-bar .active-link {\n  font-weight: bold; }\n\n.clock {\n  align-items: center;\n  background-color: #B5D0E2;\n  border: 2px solid #2099E8;\n  border-radius: 50%;\n  display: flex;\n  height: 14rem;\n  justify-content: center;\n  margin: 4rem auto;\n  width: 14rem; }\n\n.clock-text {\n  color: white;\n  font-size: 2.25rem;\n  font-weight: 300; }\n\n.controls {\n  display: flex;\n  justify-content: center; }\n  .controls .button {\n    padding: .75rem 3rem; }\n  .controls .button:first-child {\n    margin-right: 1.5rem; }\n", ""]);
+	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.top-bar .menu > .menu-text > a {\n  display: inline;\n  padding: 1; }\n\n.top-bar .active-link {\n  font-weight: bold; }\n\n.clock {\n  align-items: center;\n  background-color: #B5D0E2;\n  border: 2px solid #2099E8;\n  border-radius: 50%;\n  display: flex;\n  height: 14rem;\n  justify-content: center;\n  margin: 4rem auto;\n  width: 14rem; }\n\n.clock-text {\n  color: white;\n  font-size: 2.25rem;\n  font-weight: 300; }\n\n.controls {\n  display: flex;\n  justify-content: center; }\n  .controls .button {\n    padding: .75rem 3rem; }\n  .controls .button:first-child {\n    margin-right: 1.5rem; }\n\n.page-title {\n  margin: 2rem 0;\n  text-align: center; }\n", ""]);
 
 	// exports
 

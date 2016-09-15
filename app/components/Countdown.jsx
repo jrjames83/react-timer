@@ -23,16 +23,6 @@ var Countdown = React.createClass({
        this.timer = undefined;
     },
 
-    // as your component gets mounted - just before shown
-    // dont' have access to refs or dom yet
-    componentWillMount() {
-       console.log("component will mount")
-    },
-
-    // 
-    componentDidMount() {
-        console.log("component did mount")  
-    },
     
     handleOnSetCountdown(seconds) {
     	//console.log("updating state " + seconds)
@@ -40,16 +30,6 @@ var Countdown = React.createClass({
     		count: seconds,
     		countdownStatus: 'started'
     	})
-    },
-
-    // Check just before an update happens
-    componentWillUpdate(nextProps, nextState) {
-          
-    },
-
-    //
-    componentWillReceiveProps(nextProps) {
-          console.log("receiing props" + nextProps)
     },
 
     // Component lifescycle method when state changes or props change
@@ -89,7 +69,6 @@ var Countdown = React.createClass({
 			countdownStatus: newStatus
 		})
 	},
-
     render() {
     	var {count, countdownStatus} = this.state;
     	var renderControlArea  = () => {
