@@ -24,6 +24,7 @@ var Controls = React.createClass({
     componentWillReceiveProps(nextProps) {
         console.log('will receive props', nextProps)  
     },
+    
     render() {
     	var {countdownStatus} = this.props;
     	var renderStartStopButton = () => {

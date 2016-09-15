@@ -25788,6 +25788,11 @@
 	    return React.createElement(
 	      'div',
 	      null,
+	      React.createElement(
+	        'h1',
+	        { className: 'page-title' },
+	        'Countdown App'
+	      ),
 	      React.createElement(Clock, { totalSeconds: count }),
 	      renderControlArea()
 	    );
