@@ -25637,6 +25637,7 @@
 	                    this.startTimer();
 	                    break;
 	                case 'stopped':
+	                    // Did i put too much logic in here?
 	                    this.setState({ count: 0 });
 	                    clearInterval(this.timer);
 	                    this.timer = undefined;
@@ -25665,7 +25666,7 @@
 	            null,
 	            React.createElement(
 	                'h1',
-	                null,
+	                { className: 'page-title' },
 	                'Timer App'
 	            ),
 	            React.createElement(Clock, { totalSeconds: this.state.count }),

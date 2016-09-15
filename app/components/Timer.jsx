@@ -29,6 +29,7 @@ var Timer = React.createClass({
   					this.startTimer();
   					break;
   				case 'stopped':
+  				// Did i put too much logic in here?
   					this.setState({count:0})
   					clearInterval(this.timer)
   					this.timer = undefined;
@@ -57,7 +58,7 @@ var Timer = React.createClass({
     render() {
         return (
             <div>
-            <h1>Timer App</h1>
+            <h1 className="page-title">Timer App</h1>
             <Clock totalSeconds={this.state.count}/>
             <Controls countdownStatus={this.state.countdownStatus} onStatusChange={this.handleStatusChange} />
             </div>
