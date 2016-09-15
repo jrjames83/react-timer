@@ -25695,8 +25695,27 @@
 
 	  displayName: 'Countdown',
 
+	  // RIght before removed from dom
+	  componentWillUnmount: function componentWillUnmount() {
+	    console.log("component did unmount");
+	    clearInterval(this.timer);
+	    this.timer = undefined;
+	  },
+
+
+	  // as your component gets mounted - just before shown
+	  // dont' have access to refs or dom yet
+	  componentWillMount: function componentWillMount() {
+	    console.log("component will mount");
+	  },
+
+
+	  // 
+	  componentDidMount: function componentDidMount() {
+	    console.log("component did mount");
+	  },
 	  handleOnSetCountdown: function handleOnSetCountdown(seconds) {
-	    console.log("updating state " + seconds);
+	    //console.log("updating state " + seconds)
 	    this.setState({
 	      count: seconds,
 	      countdownStatus: 'started'
@@ -25704,13 +25723,29 @@
 	  },
 
 
-	  // Component lifescycle method when state changes
+	  // Check just before an update happens
+	  componentWillUpdate: function componentWillUpdate(nextProps, nextState) {},
+
+
+	  //
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	    console.log("receiing props" + nextProps);
+	  },
+
+
+	  // Component lifescycle method when state changes or props change
 	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	    console.log("component did update");
+	    //console.log("component did update")
 	    if (this.state.countdownStatus !== prevState.countdownStatus) {
 	      switch (this.state.countdownStatus) {
 	        case 'started':
 	          this.startTimer();
+	          break;
+	        case 'stopped':
+	          this.setState({ count: 0 });
+	        case 'paused':
+	          clearInterval(this.timer);
+	          this.timer = undefined;
 	          break;
 	      }
 	    }
@@ -25719,22 +25754,42 @@
 	    var _this = this;
 
 	    this.timer = setInterval(function () {
-	      console.log("interval ran");
+	      //console.log("interval ran")
 	      var newCount = _this.state.count - 1;
 	      _this.setState({
 	        count: newCount >= 0 ? newCount : 0
 	      });
+
+	      if (newCount === 0) {
+	        _this.setState({ countdownStatus: 'stopped' });
+	      }
 	    }, 1000);
 	  },
+	  handleStatusChange: function handleStatusChange(newStatus) {
+	    this.setState({
+	      countdownStatus: newStatus
+	    });
+	  },
 	  render: function render() {
-	    var count = this.state.count;
+	    var _this2 = this;
 
+	    var _state = this.state;
+	    var count = _state.count;
+	    var countdownStatus = _state.countdownStatus;
+
+	    var renderControlArea = function renderControlArea() {
+	      if (countdownStatus !== 'stopped') {
+	        return React.createElement(Controls, { countdownStatus: countdownStatus, onStatusChange: _this2.handleStatusChange });
+	      } else {
+	        return React.createElement(CountdownForm, { onSetCountdown: _this2.handleOnSetCountdown });
+	      }
+	    };
 
 	    return React.createElement(
 	      'div',
 	      null,
 	      React.createElement(Clock, { totalSeconds: count }),
-	      React.createElement(CountdownForm, { onSetCountdown: this.handleOnSetCountdown })
+	      renderControlArea()
 	    );
 	  }
 	});
@@ -25791,22 +25846,46 @@
 	var Controls = React.createClass({
 	    displayName: 'Controls',
 	    propTypes: {
-	        countdownStatus: React.PropTypes.string.isRequired
+	        countdownStatus: React.PropTypes.string.isRequired,
+	        onStatusChange: React.PropTypes.func.isRequired
+	    },
+
+	    // The pattern below is very nice - each button calls the same function
+	    // But the parameter differs based on the button
+	    // newStatus then will be equal to the value coded into the onClick handler
+	    // we then send this through props.onStatusChange and pass in the argument
+	    // When we render this component in its parent, we'll need to assign a click handler there
+	    // to deal with newStatus
+
+	    onStatusChange: function onStatusChange(newStatus) {
+	        var _this = this;
+
+	        return function () {
+	            _this.props.onStatusChange(newStatus);
+	            console.log(newStatus);
+	        };
+	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        console.log('will receive props', nextProps);
 	    },
 	    render: function render() {
+	        var _this2 = this;
+
 	        var countdownStatus = this.props.countdownStatus;
 
 	        var renderStartStopButton = function renderStartStopButton() {
 	            if (countdownStatus === 'started') {
+	                console.log("started in controlsjsx");
 	                return React.createElement(
 	                    'button',
-	                    { className: 'button secondary' },
+	                    { className: 'button secondary', onClick: _this2.onStatusChange('paused') },
 	                    'Pause'
 	                );
-	            } else if (countdownStatus === 'stopped') {
+	            } else if (countdownStatus === 'paused') {
+	                console.log("paused in controlsjsx");
 	                return React.createElement(
 	                    'button',
-	                    { className: 'button primary' },
+	                    { className: 'button primary', onClick: _this2.onStatusChange('started') },
 	                    'Start'
 	                );
 	            }
@@ -25818,7 +25897,7 @@
 	            renderStartStopButton(),
 	            React.createElement(
 	                'button',
-	                { className: 'button alert hollow' },
+	                { className: 'button alert hollow', onClick: this.onStatusChange('stopped') },
 	                'Clear'
 	            )
 	        );
@@ -26210,7 +26289,7 @@
 
 
 	// module
-	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.top-bar .menu > .menu-text > a {\n  display: inline;\n  padding: 1; }\n\n.top-bar .active-link {\n  font-weight: bold; }\n\n.clock {\n  align-items: center;\n  background-color: #B5D0E2;\n  border: 2px solid #2099E8;\n  border-radius: 50%;\n  display: flex;\n  height: 14rem;\n  justify-content: center;\n  margin: 4rem auto;\n  width: 14rem; }\n\n.clock-text {\n  color: white;\n  font-size: 2.25rem;\n  font-weight: 300; }\n", ""]);
+	exports.push([module.id, ".top-bar, .top-bar ul {\n  background-color: #333333; }\n\n.top-bar .menu-text {\n  color: white; }\n\n.top-bar .menu > .menu-text > a {\n  display: inline;\n  padding: 1; }\n\n.top-bar .active-link {\n  font-weight: bold; }\n\n.clock {\n  align-items: center;\n  background-color: #B5D0E2;\n  border: 2px solid #2099E8;\n  border-radius: 50%;\n  display: flex;\n  height: 14rem;\n  justify-content: center;\n  margin: 4rem auto;\n  width: 14rem; }\n\n.clock-text {\n  color: white;\n  font-size: 2.25rem;\n  font-weight: 300; }\n\n.controls {\n  display: flex;\n  justify-content: center; }\n  .controls .button {\n    padding: .75rem 3rem; }\n  .controls .button:first-child {\n    margin-right: 1.5rem; }\n", ""]);
 
 	// exports
 
